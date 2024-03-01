@@ -97,8 +97,11 @@ public class ReportService {
     }
 
     public void updateReport(Report report) {
-        Report main = reportRepository.findAll().get(0);
-        report.setId(main.getId());
+        List<Report> reports = reportRepository.findAll();
+        if (!reports.isEmpty()) {
+            Report main = reportRepository.findAll().get(0);
+            report.setId(main.getId());
+        }
         reportRepository.save(report);
         log.info("Data updated");
     }
@@ -107,13 +110,13 @@ public class ReportService {
         cacheManager.getCacheNames().forEach(cacheName -> cacheManager.getCache(cacheName).clear());
     }
 
-//    @Scheduled(fixedRate = 60000)
-//    public void readReports() throws IOException {
-//        String json = new String(Files.readAllBytes(Paths.get("src/main/resources/test_report.json")));
-//        Gson gson = new GsonBuilder()
-//                .registerTypeAdapter(LocalDate.class, new LocalDateTypeAdapter()).create();
-//        Report report = gson.fromJson(json, Report.class);
-//        updateReport(report);
-//        clearAllCache();
-//    }
+    @Scheduled(fixedRate = 30000)
+    public void readReports() throws IOException {
+        String json = new String(Files.readAllBytes(Paths.get("src/main/resources/test_report.json")));
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, new LocalDateTypeAdapter()).create();
+        Report report = gson.fromJson(json, Report.class);
+        updateReport(report);
+        clearAllCache();
+    }
 }
